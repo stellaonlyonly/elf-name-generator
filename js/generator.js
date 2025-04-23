@@ -1,149 +1,111 @@
-// Elf name database
-const nameData = {
-    high: {
-        prefixes: {
-            male: ['Ae', 'Gal', 'Cel', 'El', 'Ael', 'Fen', 'Thal', 'Mel'],
-            female: ['Ara', 'Eil', 'Sil', 'Lae', 'Cae', 'Ael', 'Tha', 'Mel']
-        },
-        suffixes: {
-            male: ['dor', 'ion', 'thor', 'ril', 'mir', 'nor', 'dril', 'ron'],
-            female: ['wen', 'riel', 'thil', 'ria', 'lia', 'dra', 'nya', 'ra']
-        }
+// 精灵名字数据库
+const elfNames = {
+    male: {
+        prefixes: ['Aer', 'Cael', 'Eld', 'Gal', 'Kel', 'Lir', 'Mel', 'Nar', 'Sil', 'Tel'],
+        suffixes: ['anor', 'arian', 'arion', 'astir', 'eanor', 'endil', 'idor', 'ion', 'ondil', 'oril']
     },
-    wood: {
-        prefixes: {
-            male: ['Tae', 'Fae', 'Dae', 'Nal', 'Bae', 'Lor', 'Kel', 'Fin'],
-            female: ['Fae', 'Mae', 'Tae', 'Lae', 'Nae', 'Kel', 'Lia', 'Wyn']
-        },
-        suffixes: {
-            male: ['lan', 'dar', 'rin', 'las', 'len', 'dor', 'nar', 'lin'],
-            female: ['lyn', 'dra', 'wen', 'ria', 'lea', 'dae', 'rae', 'na']
-        }
+    female: {
+        prefixes: ['Aer', 'Cel', 'Ela', 'Gal', 'Lia', 'Mir', 'Nar', 'Sil', 'Tia', 'Var'],
+        suffixes: ['ael', 'anna', 'ara', 'elle', 'enna', 'indi', 'ora', 'rie', 'thea', 'wen']
     },
-    dark: {
-        prefixes: {
-            male: ['Dri', 'Vic', 'Mal', 'Noc', 'Vae', 'Zar', 'Kae', 'Tyr'],
-            female: ['Vic', 'Nae', 'Shi', 'Vel', 'Zar', 'Syn', 'Lil', 'Dae']
-        },
-        suffixes: {
-            male: ['zak', 'ren', 'thar', 'kin', 'raz', 'dar', 'kos', 'vir'],
-            female: ['ra', 'ren', 'ria', 'tra', 'na', 'tha', 'dra', 'va']
-        }
-    }
+    surnames: ['Amakiir', 'Gemflower', 'Holimion', 'Liadon', 'Meliamne', 'Naïlo', 'Siannodel', 'Xiloscient']
 };
 
-// Select a random element from an array
-function randomChoice(array) {
-    return array[Math.floor(Math.random() * array.length)];
+// 生成单个名字
+function generateName(gender) {
+    const nameSet = gender === 'any' ? 
+        (Math.random() > 0.5 ? elfNames.male : elfNames.female) : 
+        elfNames[gender];
+
+    const prefix = nameSet.prefixes[Math.floor(Math.random() * nameSet.prefixes.length)];
+    const suffix = nameSet.suffixes[Math.floor(Math.random() * nameSet.suffixes.length)];
+    const surname = elfNames.surnames[Math.floor(Math.random() * elfNames.surnames.length)];
+
+    return { firstName: prefix + suffix, lastName: surname };
 }
 
-// Generate an elf name
-function generateElfName(gender, elfType) {
-    const type = nameData[elfType];
-    const actualGender = gender === 'any' ? randomChoice(['male', 'female']) : gender;
-    
-    // 生成姓氏
-    const familyPrefix = randomChoice(type.prefixes[actualGender]);
-    const familySuffix = randomChoice(type.suffixes[actualGender]);
-    const familyName = familyPrefix + familySuffix;
-    
-    // 生成名字
-    const namePrefix = randomChoice(type.prefixes[actualGender]);
-    const nameSuffix = randomChoice(type.suffixes[actualGender]);
-    const firstName = namePrefix + nameSuffix;
-    
-    return `${firstName} ${familyName}`;
-}
-
-// Generate multiple names
-function generateNames(count = 3) {
+// 生成多个名字
+function generateNames(count = 5) {
     const gender = document.getElementById('gender').value;
-    const elfType = document.getElementById('elfType').value;
-    const resultsDiv = document.getElementById('results');
+    const results = document.getElementById('results');
     
-    resultsDiv.innerHTML = '';
+    results.innerHTML = '';
     
     for (let i = 0; i < count; i++) {
-        const name = generateElfName(gender, elfType);
-        const nameElement = document.createElement('div');
-        nameElement.className = 'bg-white p-3 rounded-lg shadow border border-emerald-100 hover:shadow-lg transition-shadow';
-        nameElement.innerHTML = `
+        const { firstName, lastName } = generateName(gender);
+        const nameContainer = document.createElement('div');
+        nameContainer.className = 'bg-emerald-100/50 p-3 rounded-lg mb-2'; // 减小内边距和下边距
+        nameContainer.innerHTML = `
             <div class="flex justify-between items-center">
                 <div>
-                    <h4 class="text-lg font-cinzel font-bold text-emerald-800">${name}</h4>
-                    <div class="font-raleway text-sm text-gray-600 mt-1">
-                        ${gender === 'any' ? 'Random Gender' : (gender === 'male' ? 'Male' : 'Female')} · 
-                        ${elfType === 'high' ? 'High Elf' : (elfType === 'wood' ? 'Wood Elf' : 'Dark Elf')}
+                    <div class="font-cinzel text-lg font-bold text-emerald-900">${firstName} ${lastName}</div>
+                    <div class="text-emerald-700 text-xs font-medium mt-0.5">
+                        ${gender === 'any' ? 'Random' : gender.charAt(0).toUpperCase() + gender.slice(1)} · Elf
                     </div>
                 </div>
-                <div class="flex items-center space-x-4">
-                    <button onclick="copyToClipboard('${name}')" class="text-gray-500 hover:text-emerald-600" title="Copy">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                <div class="flex items-center gap-1.5">
+                    <button onclick="copyToClipboard('${firstName} ${lastName}')" 
+                            class="text-emerald-700 hover:text-emerald-900 transition-colors p-1">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                  d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
                         </svg>
                     </button>
-                    <button onclick="generateSimilarNames('${name}', this)" class="text-gray-500 hover:text-emerald-600 flex items-center space-x-1" title="More like this">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z"></path>
-                        </svg>
-                        <span class="text-sm">More like this</span>
+                    <button onclick="generateSimilarName(${i})" 
+                            class="text-emerald-700 hover:text-emerald-900 text-xs font-medium transition-colors">
+                        More like this
                     </button>
                 </div>
             </div>
         `;
-        resultsDiv.appendChild(nameElement);
+        results.appendChild(nameContainer);
     }
 }
 
-// 添加复制功能
+// 复制到剪贴板
 function copyToClipboard(text) {
     navigator.clipboard.writeText(text).then(() => {
-        // 可以添加复制成功的提示
+        // 复制成功
+    }).catch(err => {
+        console.error('Failed to copy text: ', err);
     });
 }
 
 // 生成相似名字
-function generateSimilarNames(name, element) {
-    if (!element) return;  // 添加安全检查
-    
+function generateSimilarName(index) {
     const gender = document.getElementById('gender').value;
-    const elfType = document.getElementById('elfType').value;
+    const { firstName, lastName } = generateName(gender);
+    const nameElements = document.getElementById('results').children;
     
-    // 生成新名字
-    const newName = generateElfName(gender, elfType);
-    
-    // 更新当前元素的内容
-    const nameContainer = element.closest('.bg-white');
-    if (!nameContainer) return;  // 添加安全检查
-    
-    nameContainer.innerHTML = `
-        <div class="flex justify-between items-center">
-            <div>
-                <h4 class="text-lg font-cinzel font-bold text-emerald-800">${newName}</h4>
-                <div class="font-raleway text-sm text-gray-600 mt-1">
-                    ${gender === 'any' ? 'Random Gender' : (gender === 'male' ? 'Male' : 'Female')} · 
-                    ${elfType === 'high' ? 'High Elf' : (elfType === 'wood' ? 'Wood Elf' : 'Dark Elf')}
+    if (nameElements[index]) {
+        nameElements[index].innerHTML = `
+            <div class="flex justify-between items-center">
+                <div>
+                    <div class="font-cinzel text-lg font-bold text-emerald-900">${firstName} ${lastName}</div>
+                    <div class="text-emerald-700 text-xs font-medium mt-0.5">
+                        ${gender === 'any' ? 'Random' : gender.charAt(0).toUpperCase() + gender.slice(1)} · Elf
+                    </div>
+                </div>
+                <div class="flex items-center gap-1.5">
+                    <button onclick="copyToClipboard('${firstName} ${lastName}')" 
+                            class="text-emerald-700 hover:text-emerald-900 transition-colors p-1">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                  d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                        </svg>
+                    </button>
+                    <button onclick="generateSimilarName(${index})" 
+                            class="text-emerald-700 hover:text-emerald-900 text-xs font-medium transition-colors">
+                        More like this
+                    </button>
                 </div>
             </div>
-            <div class="flex items-center space-x-4">
-                <button onclick="copyToClipboard('${newName}')" class="text-gray-500 hover:text-emerald-600" title="Copy">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
-                    </svg>
-                </button>
-                <button onclick="generateSimilarNames('${newName}', this)" class="text-gray-500 hover:text-emerald-600 flex items-center space-x-1" title="More like this">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z"></path>
-                    </svg>
-                    <span class="text-sm">More like this</span>
-                </button>
-            </div>
-        </div>
-    `;
+        `;
+    }
 }
 
-// Add button click event listener
-document.getElementById('generateBtn').addEventListener('click', () => generateNames(3));
+// 事件监听器
+document.getElementById('generateBtn').addEventListener('click', () => generateNames(5));
 
-// Generate initial set of names when page loads
-document.addEventListener('DOMContentLoaded', () => generateNames(3));
+// 页面加载时生成初始名字
+document.addEventListener('DOMContentLoaded', () => generateNames(5));
